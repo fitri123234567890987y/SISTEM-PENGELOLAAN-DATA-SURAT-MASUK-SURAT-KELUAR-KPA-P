@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manajemen Surat</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="p-6 bg-gray-50">
+    <header class="mb-8">
+        <h1 class="text-4xl font-extrabold text-center text-blue-700">📩 Manajemen Surat Elektronik</h1>
+        <p class="text-center text-gray-600 mt-2">Sistem pengelolaan surat masuk dan keluar KPA-P</p>
+    </header>
+
+    <div id="form-section" class="bg-white p-8 rounded-lg shadow-lg max-w-2xl mx-auto border border-gray-300">
+        <h2 class="text-2xl font-semibold text-gray-800 mb-4 text-center">Tambah Surat</h2>
+        <p class="text-gray-500 mb-6 text-center">Isi detail surat di bawah ini</p>
+        <div class="grid grid-cols-3 gap-4 mb-6">
+            <input id="nomor" placeholder="Nomor Surat" class="border p-3 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 bg-gray-50 text-gray-700" />
+            <input id="tanggal" type="date" class="border p-3 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 bg-gray-50 text-gray-700" />
+            <input id="perihal" placeholder="Perihal Surat" class="border p-3 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 bg-gray-50 text-gray-700" />
+        </div>
+        <div class="flex gap-4 justify-center">
+            <button onclick="addSurat('masuk')" class="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg shadow-md transform transition-transform hover:scale-105">Tambah Surat Masuk</button>
+            <button onclick="addSurat('keluar')" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg shadow-md transform transition-transform hover:scale-105">Tambah Surat Keluar</button>
+        </div>
+    </div>
+
+    <div id="output-section" class="mt-12 text-center hidden">
+        <div class="mb-6 flex justify-center gap-4">
+            <button onclick="showTab('masuk')" class="bg-green-500 text-white px-6 py-2 rounded-lg shadow-md">Surat Masuk</button>
+            <button onclick="showTab('keluar')" class="bg-blue-500 text-white px-6 py-2 rounded-lg shadow-md">Surat Keluar</button>
+        </div>
+        <div id="masuk" class="hidden max-w-5xl mx-auto bg-white shadow-lg rounded-lg p-6">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">📥 Surat Masuk</h2>
+            <table class="w-full border-collapse text-left">
+                <thead>
+                    <tr class="bg-gray-100 text-gray-700">
+                        <th class="border p-3">Nomor</th>
+                        <th class="border p-3">Tanggal</th>
+                        <th class="border p-3">Perihal</th>
+                    </tr>
+                </thead>
+                <tbody id="masuk-tbody"></tbody>
+            </table>
+        </div>
+        <div id="keluar" class="hidden max-w-5xl mx-auto bg-white shadow-lg rounded-lg p-6">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">📤 Surat Keluar</h2>
+            <table class="w-full border-collapse text-left">
+                <thead>
+                    <tr class="bg-gray-100 text-gray-700">
+                        <th class="border p-3">Nomor</th>
+                        <th class="border p-3">Tanggal</th>
+                        <th class="border p-3">Perihal</th>
+                    </tr>
+                </thead>
+                <tbody id="keluar-tbody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        function addSurat(type) {
+            const nomor = document.getElementById('nomor').value;
+            const tanggal = document.getElementById('tanggal').value;
+            const perihal = document.getElementById('perihal').value;
+
+            if (!nomor || !tanggal || !perihal) {
+                return alert('Lengkapi semua bidang!');
+            }
+
+            const surat = {
+                nomor,
+                tanggal,
+                perihal
+            };
+
+            // Simpan ke LocalStorage
+            const existingData = JSON.parse(localStorage.getItem(type)) || [];
+            existingData.push(surat);
+            localStorage.setItem(type, JSON.stringify(existingData));
+
+            // Tambahkan ke tabel
+            appendRow(type, surat);
+
+            // Sembunyikan form dan tampilkan output
+            document.getElementById('form-section').classList.add('hidden');
+            document.getElementById('output-section').classList.remove('hidden');
+            showTab(type);
+        }
+
+        function appendRow(type, surat) {
+            const row = `<tr>
+                            <td class='border p-3'>${surat.nomor}</td>
+                            <td class='border p-3'>${surat.tanggal}</td>
+                            <td class='border p-3'>${surat.perihal}</td>
+                        </tr>`;
+            document.getElementById(`${type}-tbody`).innerHTML += row;
+        }
+
+        function loadData() {
+            const masukData = JSON.parse(localStorage.getItem('masuk')) || [];
+            const keluarData = JSON.parse(localStorage.getItem('keluar')) || [];
+
+            masukData.forEach(surat => appendRow('masuk', surat));
+            keluarData.forEach(surat => appendRow('keluar', surat));
+
+            // Jika ada data, langsung tampilkan output
+            if (masukData.length || keluarData.length) {
+                document.getElementById('form-section').classList.add('hidden');
+                document.getElementById('output-section').classList.remove('hidden');
+            }
+        }
+
+        function showTab(tab) {
+            document.getElementById('masuk').classList.add('hidden');
+            document.getElementById('keluar').classList.add('hidden');
+            document.getElementById(tab).classList.remove('hidden');
+        }
+
+        // Muat data saat halaman dimuat
+        window.onload = loadData;
+    </script>
+</body>
+</html>
